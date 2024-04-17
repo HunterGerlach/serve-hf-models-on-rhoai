@@ -30,7 +30,8 @@ stringData:
     - Name: `llama-finetune`
     - Image Selection: `PyTorch`
     - Version selection: `2023.2 (Recommended)`
-    - Container size: `Medium`
+    - Container size: `Large` (Note: The convert step requires a lot of RAM: >30Gi(!) or it might stop prematurely. This is presumably because of some memory leak that is not controlled and since memory is not compressible the container running Jupyter is forced to restart)
+      - ![alt text](img/resources.png)
     - Accelerator: `NVIDIA GPU`
     - Number of accelerators: `1`
     - ![alt text](img/image.png)
