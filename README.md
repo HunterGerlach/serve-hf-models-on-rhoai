@@ -76,5 +76,44 @@ stringData:
     - Existing data connection: `true` (selected)
     - Name: `webinar-data-connection`
     - Path: `model/Llama-2-7b-chat-hf-fine-tuned`
-  - Select Deploy
+  - Select Deploy (this should take about 4-7 minutes)
     - This will use the data connection to pull the model from the Minio S3 bucket and deploy it onto OpenShift via RHOIA's Single Model Serving capability
+
+To interact w/ the model...
+
+- Visit the model's deployed OpenAPI endpoint
+  - https://{modelpath-dsprojectname}.apps.{clustername/url}/docs
+- Expand the /api/v1/task/text-generation endpoint
+- Click "Try it out"
+- Enter the following JSON:
+
+```json
+{
+  "inputs": "give me some quotes about sports",
+  "parameters": {
+    "max_new_tokens": 500
+  },
+  "model_id": "model/Llama-2-7b-chat-hf-fine-tuned"
+}
+```
+
+where `model/Llama-2-7b-chat-hf-fine-tuned` is the path of the model you deployed
+
+- Click "Execute"
+- The model should return a response in the "Response body" section
+
+Alternatively, you can use the following curl command:
+
+```bash
+curl -X 'POST' \
+  'https://{modelpath-dsprojectname}.apps.{clustername/url}/api/v1/task/text-generation' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "inputs": "give me some quotes about sports",
+  "parameters": {
+    "max_new_tokens": 500
+  },
+  "model_id": "model/Llama-2-7b-chat-hf-fine-tuned"
+}'
+```
