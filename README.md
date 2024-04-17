@@ -60,19 +60,21 @@ stringData:
   - If creating a new ipynb file, add each line from the repo's ipynb
   - Step through each line via SHIFT+ENTER, waiting for each step to fully complete before proceeding to the next one (`*` means the cell is still progressing)
   - Once all cells have completed, you should have a local version of the model you pulled from HuggingFace that is converted and ready to use
+    - The conversion should take about 5 minutes
+    - The upload to S3 should take about 10 minutes
 - Deploy the model:
   - Go back to the Data Science Project page
   - Select Single-model serving platform's "Deploy model" option
   - Enter the Deploy model section
-  - Specify the Model name: `Llama-2-7b-chat-hf-fine-tuned`
+  - Specify the Model name: `model/Llama-2-7b-chat-hf-fine-tuned`
   - Serving Runtime: `Caikit TGIS ServingRuntime for KServe`
   - Model framework: `caikit`
   - Model server replicas: `1`
-  - Compute resources per replica: `Medium`
+  - Compute resources per replica: `Large`
   - Accelerator: `NVIDIA GPU`
   - Model Location:
     - Existing data connection: `true` (selected)
     - Name: `webinar-data-connection`
-    - Path: `model`
+    - Path: `model/Llama-2-7b-chat-hf-fine-tuned`
   - Select Deploy
     - This will use the data connection to pull the model from the Minio S3 bucket and deploy it onto OpenShift via RHOIA's Single Model Serving capability
