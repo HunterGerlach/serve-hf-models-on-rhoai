@@ -21,6 +21,7 @@ stringData:
 - Create an OpenShift namespace - Easily do this by creating either a datascience project (as described below in the RHOAI section) or via the OpenShift web console
 - In OpenShift
   - Create a Minio instance by following: https://ai-on-openshift.io/tools-and-applications/minio/minio/#deploy-minio-in-your-project
+    - NOTE: You will need to update the default PVC size to >100Gi in the Minio deployment YAML to accommodate the model size / multiple models
   - Get the route
   - Get the secret: `minio`:`minio123`
   - Login to Minio
@@ -68,7 +69,9 @@ stringData:
   - Go back to the Data Science Project page
   - Select Single-model serving platform's "Deploy model" option
   - Enter the Deploy model section
-  - Specify the Model name: `model/Llama-2-7b-chat-hf-fine-tuned`
+  - Specify the Model name: (this is basically the beginning URL used to access the model)
+    - Example 1: `model/Llama-2-7b-chat-hf-fine-tuned`
+    - Example 2: `demo-model`
   - Serving Runtime: `Caikit TGIS ServingRuntime for KServe`
   - Model framework: `caikit`
   - Model server replicas: `1`
@@ -77,7 +80,9 @@ stringData:
   - Model Location:
     - Existing data connection: `true` (selected)
     - Name: `minio-dataconn`
-    - Path: `model/Llama-2-7b-chat-hf-fine-tuned`
+    - Path: (this is the path to the model you converted and uploaded to Minio - it should have an artifact directory and .safetensors files in it)
+      - Example 1: `model/Llama-2-7b-chat-hf-fine-tuned`
+      - Example 2: `model/merlinite-7b`
   - Select Deploy (this should take about 4-7 minutes)
     - This will use the data connection to pull the model from the Minio S3 bucket and deploy it onto OpenShift via RHOIA's Single Model Serving capability
 
@@ -87,6 +92,7 @@ To interact w/ the model...
   - https://{modelpath-dsprojectname}.apps.{clustername/url}/docs
 - Expand the /api/v1/task/text-generation endpoint
 - Click "Try it out"
+- Ensure the "Content-Type" is set to "application/json"
 - Enter the following JSON:
 
 ```json
@@ -106,6 +112,8 @@ where `model/Llama-2-7b-chat-hf-fine-tuned` is the path of the model you deploye
 
 Alternatively, you can use the following curl command:
 
+Example 1:
+
 ```bash
 curl -X 'POST' \
   'https://{modelpath-dsprojectname}.apps.{clustername/url}/api/v1/task/text-generation' \
@@ -117,5 +125,21 @@ curl -X 'POST' \
     "max_new_tokens": 500
   },
   "model_id": "model/Llama-2-7b-chat-hf-fine-tuned"
+}'
+```
+
+Example 2: (note: this is a different model ID and interacts with a self-signed certificate, hence the `-k` flag)
+
+```bash
+curl -k -X 'POST' \
+  'https://{modelpath-dsprojectname}.apps.{clustername/url}/api/v1/task/text-generation' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "inputs": "give me some quotes about sports",
+  "parameters": {
+    "max_new_tokens": 500
+  },
+  "model_id": "model/merlinite-7b"
 }'
 ```
