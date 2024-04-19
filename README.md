@@ -1,31 +1,33 @@
-# webinar-transforming-aiml-concepts-to-reality
+# serve a fine-tuned model from HuggingFace on OpenShift via RHOAI
 
 Deploying a fine-tuned model from HuggingFace
 
 - In HuggingFace.co
   - Create an account if you don't already have one
   - Obtain a token: https://huggingface.co/settings/tokens
-  - Optionally, you can create a secret directly in OpenShift to house the token via the following:
+  - You will use the token to set an environment variable in the DataScience Project later in these instructions. Optionally, you can create a secret directly in OpenShift to house the token via the following:
 
 ```yaml
 kind: Secret
 apiVersion: v1
 metadata:
   name: huggingface-secret
-  namespace: webinar-transforming-aiml-concepts-to-reality
+  namespace: <namespace-goes-here>
 type: Opaque
 stringData:
   token: <token-goes-here>
 ```
 
+- Create an OpenShift namespace - Easily do this by creating either a datascience project (as described below in the RHOAI section) or via the OpenShift web console
 - In OpenShift
   - Create a Minio instance by following: https://ai-on-openshift.io/tools-and-applications/minio/minio/#deploy-minio-in-your-project
   - Get the route
   - Get the secret: `minio`:`minio123`
   - Login to Minio
   - Create a bucket: `my-ai-bucket`
+  - We will use this bucket to store the model we pull from HuggingFace. Note: For production, you would likely want to use a more secure method of storing the model, such as a private S3 bucket or a more secure Minio instance along with proper access controls.
 - In RHOAI
-  - Create a data science project: `webinar-transforming-aiml-concepts-to-reality`
+  - Create a data science project: `<namespace-goes-here>`
   - Create a workbench:
     - Name: `llama-finetune`
     - Image Selection: `PyTorch`
@@ -47,7 +49,7 @@ stringData:
     - ![alt text](img/image-2.png)
   - Use data connection: `true` (selected)
     - Create new data connection: `true` (selected)
-    - Name: `webinar-data-connection`
+    - Name: `minio-dataconn`
     - Access Key: `minio` (default user)
     - Secret Key: `minio123` (default user pw)
     - Endpoint: API route (NOT the UI route)
@@ -74,7 +76,7 @@ stringData:
   - Accelerator: `NVIDIA GPU`
   - Model Location:
     - Existing data connection: `true` (selected)
-    - Name: `webinar-data-connection`
+    - Name: `minio-dataconn`
     - Path: `model/Llama-2-7b-chat-hf-fine-tuned`
   - Select Deploy (this should take about 4-7 minutes)
     - This will use the data connection to pull the model from the Minio S3 bucket and deploy it onto OpenShift via RHOIA's Single Model Serving capability
